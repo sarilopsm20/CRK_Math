@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cookie Math Quest</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #fff1c7, #ffd6e8);
+      color: #3b2a2a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 900px;
+      background: #fffaf2;
+      border-radius: 28px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+      padding: 28px;
+      border: 4px solid #f7b267;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .title h1 {
+      font-size: 2rem;
+      color: #8b4513;
+    }
+
+    .title p {
+      margin-top: 6px;
+      font-size: 1rem;
+      color: #6b4e3d;
+    }
+
+    .score-box {
+      background: #ffe7a8;
+      border: 3px solid #f4a261;
+      border-radius: 18px;
+      padding: 14px 20px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #7a3e00;
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero {
+      text-align: center;
+      padding: 32px 10px;
+    }
+
+    .hero .cookie {
+      font-size: 5rem;
+      margin-bottom: 12px;
+    }
+
+    .hero h2 {
+      font-size: 2rem;
+      color: #8b4513;
+      margin-bottom: 12px;
+    }
+
+    .hero p {
+      max-width: 600px;
+      margin: 0 auto 24px;
+      line-height: 1.6;
+      color: #5f4b3f;
+    }
+
+    .levels {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .level-card {
+      background: #ffffff;
+      border: 3px solid #f7b267;
+      border-radius: 20px;
+      padding: 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .level-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .level-card.locked {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .level-icon {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+    }
+
+    .level-card h3 {
+      color: #8b4513;
+      margin-bottom: 8px;
+    }
+
+    .question-card {
+      background: #ffffff;
+      border-radius: 24px;
+      border: 3px solid #f7b267;
+      padding: 24px;
+    }
+
+    .mission-label {
+      display: inline-block;
+      background: #ffd166;
+      color: #7a3e00;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+
+    .question-card h2 {
+      color: #8b4513;
+      margin-bottom: 12px;
+    }
+
+    .story {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 18px;
+      color: #4d3b32;
+    }
+
+    .question {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 18px;
+    }
+
+    .answers {
+      display: grid;
+      gap: 12px;
+    }
+
+    .answer-btn, .main-btn, .secondary-btn {
+      border: none;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    .answer-btn {
+      background: #fef3c7;
+      border: 2px solid #f4a261;
+      text-align: left;
+      color: #3b2a2a;
+    }
+
+    .answer-btn:hover, .main-btn:hover, .secondary-btn:hover {
+      transform: scale(1.02);
+    }
+
+    .answer-btn.correct {
+      background: #d8f3dc;
+      border-color: #52b788;
+    }
+
+    .answer-btn.wrong {
+      background: #ffd6d6;
+      border-color: #e76f51;
+    }
+
+    .main-btn {
+      background: #f4a261;
+      color: white;
+      font-weight: bold;
+      margin-top: 18px;
+    }
+
+    .secondary-btn {
+      background: #ffe7a8;
+      color: #7a3e00;
+      font-weight: bold;
+      margin-top: 18px;
+    }
+
+    .feedback {
+      margin-top: 16px;
+      font-weight: bold;
+      min-height: 28px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      background: #f1d5b8;
+      border-radius: 999px;
+      height: 18px;
+      overflow: hidden;
+      margin: 18px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #f4a261;
+      transition: width 0.3s;
+    }
+
+    .final-box {
+      text-align: center;
+      background: #ffffff;
+      border: 3px solid #f7b267;
+      border-radius: 24px;
+      padding: 30px;
+    }
+
+    .final-box .trophy {
+      font-size: 5rem;
+      margin-bottom: 12px;
+    }
+
+    .final-box h2 {
+      color: #8b4513;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .rank {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #7a3e00;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .app {
+        padding: 18px;
+      }
+
+      .title h1 {
+        font-size: 1.5rem;
+      }
+
+      .hero h2 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <div class="title">
+        <h1>🍪 Cookie Math Quest</h1>
+        <p>Grade 5 Math Review Adventure</p>
+      </div>
+      <div class="score-box">⭐ Score: <span id="score">0</span></div>
+    </header>
+
+    <section id="home-screen" class="screen active">
+      <div class="hero">
+        <div class="cookie">🍪</div>
+        <h2>Welcome, Math Hero!</h2>
+        <p>Complete each mission, earn points, and unlock the final boss challenge. Every correct answer gives you stars!</p>
+        <button class="main-btn" onclick="showLevels()">Start Mission</button>
+      </div>
+    </section>
+
+    <section id="levels-screen" class="screen">
+      <h2>Choose Your Level</h2>
+      <div class="progress-bar">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+      <div id="levels" class="levels"></div>
+    </section>
+
+    <section id="quiz-screen" class="screen">
+      <div class="question-card">
+        <span id="mission-label" class="mission-label"></span>
+        <h2 id="question-title"></h2>
+        <p id="story" class="story"></p>
+        <p id="question" class="question"></p>
+        <div id="answers" class="answers"></div>
+        <p id="feedback" class="feedback"></p>
+        <button id="next-btn" class="main-btn" onclick="nextQuestion()" style="display:none;">Next</button>
+        <button class="secondary-btn" onclick="showLevels()">Back to Levels</button>
+      </div>
+    </section>
+
+    <section id="final-screen" class="screen">
+      <div class="final-box">
+        <div class="trophy">🏆</div>
+        <h2>Quest Complete!</h2>
+        <p>You earned <strong><span id="final-score">0</span> points</strong>.</p>
+        <p id="rank" class="rank"></p>
+        <button class="main-btn" onclick="restartGame()">Play Again</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const levels = [
+      {
+        id: 1,
+        title: "Number Kingdom",
+        icon: "🏰",
+        skill: "6-digit numbers",
+        points: 3,
+        questions: [
+          {
+            title: "Place Value Adventure",
+            story: "Hollyberry Cookie found 456,782 gems in the kingdom vault.",
+            question: "What is the value of the digit 5?",
+            answers: ["5", "500", "50,000", "500,000"],
+            correct: 2
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "Pattern Forest",
+        icon: "🌲",
+        skill: "Counting patterns",
+        points: 3,
+        questions: [
+          {
+            title: "Counting by Thousands",
+            story: "GingerBrave is jumping across magic stones that increase by 1,000 each time.",
+            question: "What comes next? 12,000, 13,000, 14,000, ____",
+            answers: ["14,100", "15,000", "24,000", "13,500"],
+            correct: 1
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "Frozen Negative Cave",
+        icon: "❄️",
+        skill: "Negative numbers",
+        points: 3,
+        questions: [
+          {
+            title: "Below Zero Mission",
+            story: "Frost Cookie is standing on floor 3 and walks down 7 floors.",
+            question: "Which floor does Frost Cookie reach?",
+            answers: ["4", "-4", "10", "-10"],
+            correct: 1
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "Addition Arena",
+        icon: "⚔️",
+        skill: "Addition and estimation",
+        points: 3,
+        questions: [
+          {
+            title: "Magic Bean Battle",
+            story: "Espresso Cookie collected 45,782 magic beans and 32,419 sugar crystals.",
+            question: "How many items did he collect altogether?",
+            answers: ["78,201", "77,101", "88,201", "13,363"],
+            correct: 0
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "Subtraction Tower",
+        icon: "🛡️",
+        skill: "Subtraction",
+        points: 3,
+        questions: [
+          {
+            title: "Kingdom Upgrade",
+            story: "Dark Cacao Cookie had 98,000 coins and spent 47,582 coins upgrading the kingdom.",
+            question: "How many coins remain?",
+            answers: ["50,418", "51,418", "40,418", "145,582"],
+            correct: 0
+          }
+        ]
+      }
+    ];
+
+    let score = Number(localStorage.getItem("cookieMathScore")) || 0;
+    let completedLevels = JSON.parse(localStorage.getItem("completedLevels")) || [];
+    let currentLevelIndex = 0;
+    let currentQuestionIndex = 0;
+    let answered = false;
+
+    document.getElementById("score").textContent = score;
+
+    function showScreen(screenId) {
+      document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
+      document.getElementById(screenId).classList.add("active");
+    }
+
+    function showLevels() {
+      renderLevels();
+      showScreen("levels-screen");
+    }
+
+    function renderLevels() {
+      const container = document.getElementById("levels");
+      container.innerHTML = "";
+
+      levels.forEach((level, index) => {
+        const isUnlocked = index === 0 || completedLevels.includes(levels[index - 1].id);
+        const isCompleted = completedLevels.includes(level.id);
+
+        const card = document.createElement("div");
+        card.className = "level-card" + (isUnlocked ? "" : " locked");
+        card.innerHTML = `
+          <div class="level-icon">${isCompleted ? "✅" : level.icon}</div>
+          <h3>Level ${level.id}: ${level.title}</h3>
+          <p>${level.skill}</p>
+          <p><strong>+${level.points} points</strong></p>
+        `;
+
+        if (isUnlocked) {
+          card.onclick = () => startLevel(index);
+        }
+
+        container.appendChild(card);
+      });
+
+      updateProgress();
+    }
+
+    function startLevel(index) {
+      currentLevelIndex = index;
+      currentQuestionIndex = 0;
+      loadQuestion();
+      showScreen("quiz-screen");
+    }
+
+    function loadQuestion() {
+      answered = false;
+      const level = levels[currentLevelIndex];
+      const currentQuestion = level.questions[currentQuestionIndex];
+
+      document.getElementById("mission-label").textContent = `Level ${level.id} • +${level.points} points`;
+      document.getElementById("question-title").textContent = currentQuestion.title;
+      document.getElementById("story").textContent = currentQuestion.story;
+      document.getElementById("question").textContent = currentQuestion.question;
+      document.getElementById("feedback").textContent = "";
+      document.getElementById("next-btn").style.display = "none";
+
+      const answersContainer = document.getElementById("answers");
+      answersContainer.innerHTML = "";
+
+      currentQuestion.answers.forEach((answer, index) => {
+        const button = document.createElement("button");
+        button.className = "answer-btn";
+        button.textContent = answer;
+        button.onclick = () => checkAnswer(button, index);
+        answersContainer.appendChild(button);
+      });
+    }
+
+    function checkAnswer(button, selectedIndex) {
+      if (answered) return;
+      answered = true;
+
+      const level = levels[currentLevelIndex];
+      const currentQuestion = level.questions[currentQuestionIndex];
+      const feedback = document.getElementById("feedback");
+
+      const answerButtons = document.querySelectorAll(".answer-btn");
+      answerButtons[currentQuestion.correct].classList.add("correct");
+
+      if (selectedIndex === currentQuestion.correct) {
+        button.classList.add("correct");
+        feedback.textContent = `Correct! You earned ${level.points} points! ⭐`;
+        score += level.points;
+        saveScore();
+      } else {
+        button.classList.add("wrong");
+        feedback.textContent = "Good try! Look at the correct answer and keep going. 💛";
+      }
+
+      if (!completedLevels.includes(level.id)) {
+        completedLevels.push(level.id);
+        localStorage.setItem("completedLevels", JSON.stringify(completedLevels));
+      }
+
+      document.getElementById("next-btn").style.display = "inline-block";
+    }
+
+    function nextQuestion() {
+      const level = levels[currentLevelIndex];
+
+      if (currentQuestionIndex < level.questions.length - 1) {
+        currentQuestionIndex++;
+        loadQuestion();
+      } else if (completedLevels.length === levels.length) {
+        showFinalScreen();
+      } else {
+        showLevels();
+      }
+    }
+
+    function saveScore() {
+      localStorage.setItem("cookieMathScore", score);
+      document.getElementById("score").textContent = score;
+    }
+
+    function updateProgress() {
+      const progress = (completedLevels.length / levels.length) * 100;
+      document.getElementById("progress-fill").style.width = `${progress}%`;
+    }
+
+    function showFinalScreen() {
+      document.getElementById("final-score").textContent = score;
+
+      let rank = "Cookie Apprentice 🍪";
+      if (score >= 12) rank = "Math Knight ⚔️";
+      if (score >= 15) rank = "Master Cookie Mathematician 👑";
+
+      document.getElementById("rank").textContent = rank;
+      showScreen("final-screen");
+    }
+
+    function restartGame() {
+      score = 0;
+      completedLevels = [];
+      localStorage.removeItem("cookieMathScore");
+      localStorage.removeItem("completedLevels");
+      saveScore();
+      showScreen("home-screen");
+    }
+  </script>
+</body>
+</html>
